@@ -1,15 +1,70 @@
-import { Text, View } from "react-native";
+import HomeImage from '@/assets/images/android-icon-foreground.png';
+import { useRouter } from 'expo-router';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-export default function Index() {
+const HomeScreen = () => {
+
+  const router = useRouter();
+
   return (
     <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
+      style={styles.container}
     >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
+
+      <Image source= {HomeImage} style = {styles.image}/>
+
+      <Text style={styles.title}>Welcome To Notes App</Text>
+      <Text style={styles.subtitle}>Capture your thoughts anytime, anywhere</Text>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push('/notes')}
+      >
+        <Text style={styles.buttonText}>Get Started</Text>
+      </TouchableOpacity>
     </View>
   );
 }
+
+
+const styles = StyleSheet.create({
+  container:{
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: '#f8f9fa',
+  },
+  image:{
+    width: 100,
+    height: 100,
+    marginBottom: 20,
+    borderRadius: 10,
+  },
+  title:{
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  subtitle:{
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  button:{
+    backgroundColor: '#007bff',
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText:{
+    color: 'fff',
+    fontSize :18,
+    fontWeight:'bold',
+  }
+});
+
+export default HomeScreen
