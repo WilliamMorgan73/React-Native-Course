@@ -1,11 +1,13 @@
 import { useState } from "react";
 import {
-    FlatList,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
+
+import AddNoteModal from "@/components/addNoteModal";
+import NoteList from "@/components/noteList";
 
 const NoteScreen = () => {
   const [notes, setNotes] = useState([
@@ -14,29 +16,45 @@ const NoteScreen = () => {
     { id: "3", text: "Note Three" },
   ]);
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newNote, setNewNote] = useState("");
+
+  // Add Note function
+
+  const addNote = () => {
+    if (newNote.trim() === "") return;
+
+    setNotes((prevNotes) => [
+      ...prevNotes,
+      { id: Date.now.toString(), text: newNote },
+    ]);
+
+    setNewNote("");
+    setModalVisible(false);
+  };
+
   return (
     <View style={styles.container}>
       {/* Display Notes here */}
 
-      <FlatList
-        data={notes}
-        // Key extractor uses a function to get the ids from the array
-        keyExtractor={(item) => item.id}
-        // Render item gets the text from each item and displays it
-        renderItem={({ item }) => (
-          <View style={styles.noteItem}>
-            <Text style={styles.noteText}>{item.text}</Text>
-          </View>
-        )}
-      />
+      <NoteList notes={notes}></NoteList>
 
-        <TouchableOpacity style={styles.addButton}>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <Text style={styles.addButtonText}>+ Add Note</Text>
+      </TouchableOpacity>
 
-            <Text style={styles.addButtonText}>
-                + Add Note
-            </Text>
+      {/* Modal */}
 
-        </TouchableOpacity>
+      <AddNoteModal 
+      modalVisible={modalVisible}
+      setModalVisible={setModalVisible}
+      newNote={newNote}
+      setNewNote={setNewNote}
+      addNote={addNote}
+      ></AddNoteModal>
 
     </View>
   );
@@ -48,32 +66,22 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff",
   },
-  noteItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#f5f5f5",
+  addButton: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    right: 20,
+    backgroundColor: "#007bff",
     padding: 15,
-    borderRadius: 5,
-    marginVertical: 5,
-  },
-  noteText: {
-    fontSize: 18,
-  },
-  addButton:{
-    position: 'absolute',
-    bottom:20,
-    left:20,
-    right:20,
-    backgroundColor: '007bff',
-    padding:15,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
-  addButtonText:{
-    color: 'fff',
+  addButtonText: {
+    color: "fff",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
+
 });
 
 export default NoteScreen;
