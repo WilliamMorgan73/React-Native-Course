@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  Alert,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -8,16 +9,36 @@ import {
 
 import AddNoteModal from "@/components/addNoteModal";
 import NoteList from "@/components/noteList";
+import noteService from "@/services/noteService";
 
 const NoteScreen = () => {
-  const [notes, setNotes] = useState([
-    { id: "1", text: "Note One" },
-    { id: "2", text: "Note Two" },
-    { id: "3", text: "Note Three" },
-  ]);
+  const [notes, setNotes] = useState([]);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [newNote, setNewNote] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error ,setError] = useState(null);
+
+  useEffect(() =>{
+    fetchNotes();
+  }, []);
+
+
+  const fetchNotes = async () => {
+    setLoading(true)
+    const response = await noteService.getNotes();
+
+    if(response.error){
+      setError(response.error)
+      Alert.alert('Error', response.error)
+    }
+    else{
+      setNotes(response.data);
+      setError(null);
+    }
+
+    setLoading(false);
+  }
 
   // Add Note function
 
