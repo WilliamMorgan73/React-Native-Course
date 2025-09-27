@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 import AddNoteModal from "@/components/addNoteModal";
@@ -17,48 +18,77 @@ const NoteScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newNote, setNewNote] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error ,setError] = useState(null);
+  const [error, setError] = useState(null);
 
-  useEffect(() =>{
+  useEffect(() => {
     fetchNotes();
   }, []);
 
-
   const fetchNotes = async () => {
-    setLoading(true)
+    setLoading(true);
     const response = await noteService.getNotes();
 
-    if(response.error){
-      setError(response.error)
-      Alert.alert('Error', response.error)
-    }
-    else{
+    if (response.error) {
+      setError(response.error);
+      Alert.alert("Error", response.error);
+    } else {
       setNotes(response.data);
       setError(null);
     }
 
     setLoading(false);
-  }
+  };
 
   // Add Note function
 
-  const addNote = () => {
+  const addNote = async () => {
     if (newNote.trim() === "") return;
 
-    setNotes((prevNotes) => [
-      ...prevNotes,
-      { id: Date.now.toString(), text: newNote },
-    ]);
+    const response = await noteService.addNote(newNote);
+
+    // Check for error
+
+    if (response.error) {
+      Alert.alert("Error", response.error);
+    } else {
+      setNotes([...notes, response.data]);
+    }
 
     setNewNote("");
     setModalVisible(false);
   };
 
+  // Delete Note
+
+  const deleteNote = async (id) => {
+    Alert.alert("Delete Note", "Are you sure you want to delete this note?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          const response = await noteService.deleteNote(id);
+          if (response.error) {
+            Alert.alert("Error", response.error);
+          } else {
+            setNotes(notes.filter((note) => note.$id !== id));
+          }
+        },
+      },
+    ]);
+  };
+
   return (
     <View style={styles.container}>
-      {/* Display Notes here */}
-
-      <NoteList notes={notes}></NoteList>
+      {/* Check if loading */}
+      {loading ? (
+        <ActivityIndicator size="large" color="#007bff" />
+      ) : (
+        <>
+          {error && <Text style={styles.errorText}>{error}</Text>}
+          <NoteList notes={notes} onDelete={deleteNote} />
+        </>
+      )}
 
       <TouchableOpacity
         style={styles.addButton}
@@ -69,14 +99,13 @@ const NoteScreen = () => {
 
       {/* Modal */}
 
-      <AddNoteModal 
-      modalVisible={modalVisible}
-      setModalVisible={setModalVisible}
-      newNote={newNote}
-      setNewNote={setNewNote}
-      addNote={addNote}
+      <AddNoteModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        newNote={newNote}
+        setNewNote={setNewNote}
+        addNote={addNote}
       ></AddNoteModal>
-
     </View>
   );
 };
@@ -102,7 +131,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginBottom: 10,
+    fontSize: 16,
+  },
 });
 
 export default NoteScreen;
