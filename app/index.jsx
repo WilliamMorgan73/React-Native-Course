@@ -1,70 +1,96 @@
-import HomeImage from '@/assets/images/android-icon-foreground.png';
-import { useRouter } from 'expo-router';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import HomeImage from "@/assets/images/android-icon-foreground.png";
+import { useAuth } from "@/contexts/authContext";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const HomeScreen = () => {
-
+  const { user, loading } = useAuth();
   const router = useRouter();
 
-  return (
-    <View
-      style={styles.container}
-    >
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/notes");
+    }
+  }, [user, loading]);
 
-      <Image source= {HomeImage} style = {styles.image}/>
+  if (loading) {
+    return (
+      <View style={styles.centeredContainer}>
+        <ActivityIndicator size="large" color="#007bff"></ActivityIndicator>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <Image source={HomeImage} style={styles.image} />
 
       <Text style={styles.title}>Welcome To Notes App</Text>
-      <Text style={styles.subtitle}>Capture your thoughts anytime, anywhere</Text>
+      <Text style={styles.subtitle}>
+        Capture your thoughts anytime, anywhere
+      </Text>
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push('/notes')}
+        onPress={() => router.push("/notes")}
       >
         <Text style={styles.buttonText}>Get Started</Text>
       </TouchableOpacity>
     </View>
   );
-}
-
+};
 
 const styles = StyleSheet.create({
-  container:{
+  container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
   },
-  image:{
+  image: {
     width: 100,
     height: 100,
     marginBottom: 20,
     borderRadius: 10,
   },
-  title:{
+  title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
-    color: '#333',
+    color: "#333",
   },
-  subtitle:{
+  subtitle: {
     fontSize: 16,
-    color: '#333',
-    textAlign: 'center',
+    color: "#333",
+    textAlign: "center",
     marginBottom: 20,
   },
-  button:{
-    backgroundColor: '#007bff',
+  button: {
+    backgroundColor: "#007bff",
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
-  buttonText:{
-    color: 'fff',
-    fontSize :18,
-    fontWeight:'bold',
-  }
+  buttonText: {
+    color: "fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  centeredContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+  },
 });
 
-export default HomeScreen
+export default HomeScreen;

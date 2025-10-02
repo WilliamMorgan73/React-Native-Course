@@ -1,3 +1,5 @@
+import { useAuth } from "@/contexts/authContext";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -13,6 +15,10 @@ import NoteList from "@/components/noteList";
 import noteService from "@/services/noteService";
 
 const NoteScreen = () => {
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+  // Loading:authLoading just renames the global loading to authLoading since we have a local loading state
+
   const [notes, setNotes] = useState([]);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -21,12 +27,20 @@ const NoteScreen = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchNotes();
-  }, []);
+    if (!authLoading && !user) {
+      router.replace("/auth");
+    }
+  }, [user, authLoading]);
+
+  useEffect(() => {
+    if (user) {
+      fetchNotes();
+    }
+  }, [user]);
 
   const fetchNotes = async () => {
     setLoading(true);
-    const response = await noteService.getNotes();
+    const response = await noteService.getNotes(user.$id);
 
     if (response.error) {
       setError(response.error);
@@ -44,7 +58,7 @@ const NoteScreen = () => {
   const addNote = async () => {
     if (newNote.trim() === "") return;
 
-    const response = await noteService.addNote(newNote);
+    const response = await noteService.addNote(newNote, user.$id);
 
     // Check for error
 
@@ -109,7 +123,9 @@ const NoteScreen = () => {
       ) : (
         <>
           {error && <Text style={styles.errorText}>{error}</Text>}
-          <NoteList notes={notes} onDelete={deleteNote} onEdit={editNote} />
+
+          {notes.length === 0 ? (<Text style={styles.noNoteText}>You have no notes</Text>): (
+          <NoteList notes={notes} onDelete={deleteNote} onEdit={editNote} />)}
         </>
       )}
 
@@ -160,6 +176,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontSize: 16,
   },
+  noNoteText:{
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#555',
+    marginTop: 15,
+  }
 });
 
 export default NoteScreen;
